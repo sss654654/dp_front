@@ -34,7 +34,7 @@ const DashboardContent: React.FC = () => {
     (message) => {
       console.log('📨 [Dashboard] 웹소켓 메시지 수신:', message);
 
-      // 대여/반납 이벤트 발생 시 데이터 새로고침 및 알림
+      // 대여/반납/연체 이벤트 발생 시 데이터 새로고침 및 알림
       if (message.type === 'RENTAL_CREATED') {
         // 새 대여 발생
         queryClient.invalidateQueries({ queryKey: ['rentals'] });
@@ -54,6 +54,16 @@ const DashboardContent: React.FC = () => {
         const itemName = message.data?.itemName || '물품';
         const renterName = message.data?.renterName || '사용자';
         alert(`🔔 반납이 완료되었습니다!\n물품: ${itemName}\n반납자: ${renterName}`);
+
+      } else if (message.type === 'RENTAL_OVERDUE') {
+        // 연체 발생
+        queryClient.invalidateQueries({ queryKey: ['rentals'] });
+
+        // 알림 표시
+        const itemName = message.data?.itemName || '물품';
+        const renterName = message.data?.renterName || '사용자';
+        const expectedReturnDate = message.data?.expectedReturnDate || '반납 예정일';
+        alert(`⚠️ 연체가 발생했습니다!\n물품: ${itemName}\n대여자: ${renterName}\n반납 예정일: ${expectedReturnDate}`);
       }
     }
   );

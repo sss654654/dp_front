@@ -150,19 +150,17 @@ export const RentalForm: React.FC<RentalFormProps> = ({ items, onSubmit, isSubmi
         {/* 반납 예정일 */}
         <div>
           <label htmlFor="expectedReturnDate" className="block text-sm font-medium text-gray-700 mb-1">
-            반납 예정일 *
+            반납 예정일 (자동 설정: 대여일 +2일)
           </label>
           <input
             type="date"
             id="expectedReturnDate"
             value={formData.expectedReturnDate}
-            onChange={(e) => setFormData({ ...formData, expectedReturnDate: e.target.value })}
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003876] ${
-              errors.expectedReturnDate ? 'border-red-500' : 'border-gray-300'
-            }`}
-            min={new Date().toISOString().split('T')[0]}
+            readOnly
+            disabled
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
           />
-          {errors.expectedReturnDate && <p className="text-red-500 text-xs mt-1">{errors.expectedReturnDate}</p>}
+          <p className="text-gray-500 text-xs mt-1">반납 예정일은 대여일로부터 2일 뒤로 자동 설정됩니다.</p>
         </div>
 
         {/* 비고 */}
