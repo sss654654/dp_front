@@ -61,15 +61,15 @@ export const useCreateItem = () => {
 };
 
 /**
- * 물품 정보 수정 훅
+ * 물품 정보 수정 훅 (PATCH 사용)
  */
 export const useUpdateItem = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: UpdateItemRequest }) => {
+    mutationFn: async ({ id, data }: { id: number; data: Partial<UpdateItemRequest> }) => {
       try {
-        return await itemApiService.updateItem(id, data);
+        return await itemApiService.patchItem(id, data);
       } catch (error) {
         console.error('물품 정보 수정 실패:', error);
         throw error;

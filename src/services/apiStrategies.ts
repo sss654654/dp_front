@@ -164,7 +164,9 @@ class UpdateItemStrategy implements ItemApiStrategy {
  */
 class PatchItemStrategy implements ItemApiStrategy {
   async execute(id: number, data: Partial<UpdateItemRequest>): Promise<Item> {
+    console.log('📤 [전략 패턴] 물품 수정 요청 - ID:', id, 'Data:', JSON.stringify(data, null, 2));
     const response = await api.patch<Item>(`/items/${id}`, data);
+    console.log('✅ [전략 패턴] 물품 수정 응답:', response.data);
     return response.data;
   }
 }
