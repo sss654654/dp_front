@@ -34,10 +34,26 @@ const DashboardContent: React.FC = () => {
     (message) => {
       console.log('📨 [Dashboard] 웹소켓 메시지 수신:', message);
 
-      // 대여/반납 이벤트 발생 시 데이터 새로고침
-      if (message.type === 'RENTAL_CREATED' || message.type === 'RENTAL_RETURNED') {
+      // 대여/반납 이벤트 발생 시 데이터 새로고침 및 알림
+      if (message.type === 'RENTAL_CREATED') {
+        // 새 대여 발생
         queryClient.invalidateQueries({ queryKey: ['rentals'] });
         queryClient.invalidateQueries({ queryKey: ['items'] });
+
+        // 알림 표시
+        const itemName = message.data?.itemName || '물품';
+        const renterName = message.data?.renterName || '사용자';
+        alert(`🔔 새로운 대여가 발생했습니다!\n물품: ${itemName}\n대여자: ${renterName}`);
+
+      } else if (message.type === 'RENTAL_RETURNED') {
+        // 반납 발생
+        queryClient.invalidateQueries({ queryKey: ['rentals'] });
+        queryClient.invalidateQueries({ queryKey: ['items'] });
+
+        // 알림 표시
+        const itemName = message.data?.itemName || '물품';
+        const renterName = message.data?.renterName || '사용자';
+        alert(`🔔 반납이 완료되었습니다!\n물품: ${itemName}\n반납자: ${renterName}`);
       }
     }
   );
