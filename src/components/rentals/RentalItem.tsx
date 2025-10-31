@@ -94,7 +94,7 @@ export const RentalItem: React.FC<RentalItemProps> = ({
 
         {/* 액션 버튼 */}
         <div className="flex space-x-2">
-          {rental.status === 'ONGOING' && (
+          {(rental.status === 'ONGOING' || rental.status === 'OVERDUE') && (
             <Button
               onClick={() => onReturn(rental.id)}
               variant="primary"

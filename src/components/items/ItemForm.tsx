@@ -14,6 +14,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({ item, onSubmit, onCancel, is
     name: '',
     category: '',
     description: '',
+    imageUrl: '',
     stock: '',
   });
 
@@ -21,10 +22,16 @@ export const ItemForm: React.FC<ItemFormProps> = ({ item, onSubmit, onCancel, is
 
   useEffect(() => {
     if (item) {
+      // description에서 이미지 URL 추출
+      const imgMatch = item.description.match(/\[IMG:(.*?)\]$/);
+      const imageUrl = imgMatch ? imgMatch[1] : '';
+      const description = imgMatch ? item.description.replace(/\[IMG:.*?\]$/, '').trim() : item.description;
+
       setFormData({
         name: item.name,
         category: item.category,
-        description: item.description,
+        description,
+        imageUrl,
         stock: item.totalStock.toString(),
       });
     }
@@ -47,10 +54,16 @@ export const ItemForm: React.FC<ItemFormProps> = ({ item, onSubmit, onCancel, is
 
     if (!validate()) return;
 
+    // 이미지 URL을 description에 포함
+    let description = formData.description.trim();
+    if (formData.imageUrl.trim()) {
+      description += ` [IMG:${formData.imageUrl.trim()}]`;
+    }
+
     onSubmit({
       name: formData.name.trim(),
       category: formData.category.trim(),
-      description: formData.description.trim(),
+      description,
       stock: Number(formData.stock),
     });
   };
@@ -109,6 +122,34 @@ export const ItemForm: React.FC<ItemFormProps> = ({ item, onSubmit, onCancel, is
           placeholder="물품에 대한 설명을 입력하세요"
         />
         {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
+      </div>
+
+      {/* 이미지 URL */}
+      <div>
+        <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
+          이미지 URL (선택사항)
+        </label>
+        <input
+          type="url"
+          id="imageUrl"
+          value={formData.imageUrl}
+          onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003876]"
+          placeholder="https://example.com/image.jpg"
+        />
+        <p className="text-gray-500 text-xs mt-1">물품 이미지 URL을 입력하세요 (선택사항)</p>
+        {formData.imageUrl && (
+          <div className="mt-2">
+            <img
+              src={formData.imageUrl}
+              alt="미리보기"
+              className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* 재고 수량 */}

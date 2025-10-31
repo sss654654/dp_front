@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, Download } from 'lucide-react';
 import { Card } from '../common/Card';
+import { Button } from '../common/Button';
 import { RentalItem } from './RentalItem';
 import { Rental, RentalStatus } from '../../types';
+import * as XLSX from 'xlsx';
 
 interface RentalListProps {
   rentals: Rental[];
@@ -48,6 +50,34 @@ export const RentalList: React.FC<RentalListProps> = ({
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedRentals = filteredRentals.slice(startIndex, startIndex + itemsPerPage);
 
+  // 엑셀 다운로드 함수
+  const handleExcelDownload = () => {
+    // 엑셀로 변환할 데이터 준비
+    const excelData = filteredRentals.map((rental) => ({
+      '대여 ID': rental.id,
+      '물품명': rental.itemName,
+      '대여자': rental.renterName,
+      '연락처': rental.renterContact,
+      '상태': rental.status === 'ONGOING' ? '대여중' : rental.status === 'COMPLETED' ? '반납완료' : '연체',
+      '대여일': new Date(rental.rentalDate).toLocaleDateString('ko-KR'),
+      '반납예정일': new Date(rental.expectedReturnDate).toLocaleDateString('ko-KR'),
+      '실제반납일': rental.returnDate ? new Date(rental.returnDate).toLocaleDateString('ko-KR') : '-',
+      '비고': rental.notes || '-',
+    }));
+
+    // 워크시트 생성
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, '대여 기록');
+
+    // 파일명 생성 (현재 날짜 포함)
+    const today = new Date();
+    const fileName = `대여기록_${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}.xlsx`;
+
+    // 파일 다운로드
+    XLSX.writeFile(workbook, fileName);
+  };
+
   return (
     <div className="space-y-4">
       {/* 필터 및 검색 */}
@@ -85,6 +115,17 @@ export const RentalList: React.FC<RentalListProps> = ({
               <option value="OVERDUE">연체</option>
             </select>
           </div>
+
+          {/* 엑셀 다운로드 버튼 */}
+          <Button
+            onClick={handleExcelDownload}
+            variant="secondary"
+            size="md"
+            disabled={filteredRentals.length === 0}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            엑셀 다운로드
+          </Button>
         </div>
 
         {/* 결과 요약 */}

@@ -12,6 +12,7 @@ import { StatCard } from '../components/dashboard/StatCard';
 import { QuickActions } from '../components/dashboard/QuickActions';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 import { PopularItems } from '../components/dashboard/PopularItems';
+import { MonthlyRentalChart } from '../components/dashboard/MonthlyRentalChart';
 import { useRentals } from '../hooks/useRentals';
 import { useItems } from '../hooks/useItems';
 import { useRentalObserver } from '../hooks/useRentalObserver';
@@ -66,6 +67,11 @@ const DashboardContent: React.FC = () => {
       {/* 빠른 액션 */}
       <div className="mb-8">
         <QuickActions />
+      </div>
+
+      {/* 월별 대여 통계 그래프 */}
+      <div className="mb-8">
+        <MonthlyRentalChart rentals={allRentals} />
       </div>
 
       {/* 하단 그리드 */}

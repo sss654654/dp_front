@@ -15,6 +15,11 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, onEdit, onDelete, isDe
   const isLowStock = item.stock <= item.totalStock * 0.2 && item.stock > 0;
   const isOutOfStock = item.stock === 0;
 
+  // description에서 이미지 URL 추출
+  const imgMatch = item.description.match(/\[IMG:(.*?)\]$/);
+  const imageUrl = imgMatch ? imgMatch[1] : '';
+  const description = imgMatch ? item.description.replace(/\[IMG:.*?\]$/, '').trim() : item.description;
+
   return (
     <Card className={`${isOutOfStock ? 'bg-gray-100 opacity-75' : ''} relative`}>
       {/* 재고 상태 배지 */}
@@ -40,8 +45,22 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, onEdit, onDelete, isDe
 
       {/* 물품 정보 */}
       <div className="space-y-3">
+        {/* 이미지 또는 아이콘 */}
         <div className="flex items-start space-x-3">
-          <div className="p-3 bg-blue-100 rounded-lg">
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={item.name}
+              className="w-16 h-16 object-cover rounded-lg border border-gray-300"
+              onError={(e) => {
+                // 이미지 로딩 실패 시 기본 아이콘으로 대체
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                target.nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+          ) : null}
+          <div className={`p-3 bg-blue-100 rounded-lg ${imageUrl ? 'hidden' : ''}`}>
             <Package className="w-6 h-6 text-blue-600" />
           </div>
           <div className="flex-1">
@@ -52,7 +71,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, onEdit, onDelete, isDe
           </div>
         </div>
 
-        <p className="text-sm text-gray-700 line-clamp-2">{item.description}</p>
+        <p className="text-sm text-gray-700 line-clamp-2">{description}</p>
 
         {/* 재고 현황 */}
         <div className="space-y-2">
