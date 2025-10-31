@@ -16,10 +16,10 @@ interface RentalFormProps {
 }
 
 export const RentalForm: React.FC<RentalFormProps> = ({ items, onSubmit, isSubmitting = false }) => {
-  // 기본 반납 예정일을 3일 뒤로 설정
+  // 기본 반납 예정일을 2일 뒤로 설정 (대여일 포함 3일 사용 가능)
   const getDefaultReturnDate = () => {
     const date = new Date();
-    date.setDate(date.getDate() + 3);
+    date.setDate(date.getDate() + 2);
     return date.toISOString().split('T')[0];
   };
 

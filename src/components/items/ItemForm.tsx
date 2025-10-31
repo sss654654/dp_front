@@ -4,7 +4,7 @@ import { Item } from '../../types';
 
 interface ItemFormProps {
   item?: Item;
-  onSubmit: (data: { name: string; category: string; description: string; stock: number }) => void;
+  onSubmit: (data: { name: string; category: string; description: string; stock?: number }) => void;
   onCancel: () => void;
   isSubmitting?: boolean;
 }
@@ -43,7 +43,11 @@ export const ItemForm: React.FC<ItemFormProps> = ({ item, onSubmit, onCancel, is
     if (!formData.name.trim()) newErrors.name = '물품명을 입력해주세요.';
     if (!formData.category.trim()) newErrors.category = '카테고리를 입력해주세요.';
     if (!formData.description.trim()) newErrors.description = '설명을 입력해주세요.';
-    if (!formData.stock || Number(formData.stock) < 1) newErrors.stock = '재고는 1개 이상이어야 합니다.';
+
+    // 신규 등록 시에만 재고 검증
+    if (!item && (!formData.stock || Number(formData.stock) < 1)) {
+      newErrors.stock = '재고는 1개 이상이어야 합니다.';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -60,12 +64,19 @@ export const ItemForm: React.FC<ItemFormProps> = ({ item, onSubmit, onCancel, is
       description += ` [IMG:${formData.imageUrl.trim()}]`;
     }
 
-    onSubmit({
+    // 수정 모드일 때는 stock을 제외하고 전송
+    const submitData: any = {
       name: formData.name.trim(),
       category: formData.category.trim(),
       description,
-      stock: Number(formData.stock),
-    });
+    };
+
+    // 신규 등록일 때만 stock 포함
+    if (!item) {
+      submitData.stock = Number(formData.stock);
+    }
+
+    onSubmit(submitData);
   };
 
   return (
@@ -155,19 +166,21 @@ export const ItemForm: React.FC<ItemFormProps> = ({ item, onSubmit, onCancel, is
       {/* 재고 수량 */}
       <div>
         <label htmlFor="stock" className="block text-sm font-medium text-gray-700 mb-1">
-          재고 수량 *
+          재고 수량 {!item && '*'}
         </label>
         <input
           type="number"
           id="stock"
           value={formData.stock}
           onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+          disabled={!!item}
           className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003876] ${
             errors.stock ? 'border-red-500' : 'border-gray-300'
-          }`}
+          } ${item ? 'bg-gray-100 cursor-not-allowed' : ''}`}
           min="1"
           placeholder="1"
         />
+        {item && <p className="text-gray-500 text-xs mt-1">재고 수량은 수정 모드에서 변경할 수 없습니다.</p>}
         {errors.stock && <p className="text-red-500 text-xs mt-1">{errors.stock}</p>}
       </div>
 
