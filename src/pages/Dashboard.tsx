@@ -6,7 +6,7 @@
  * 2. 데코레이터 패턴: withLoading, withErrorBoundary로 기능 확장
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Package, ShoppingCart, AlertCircle, CheckCircle } from 'lucide-react';
 import { StatCard } from '../components/dashboard/StatCard';
 import { QuickActions } from '../components/dashboard/QuickActions';
@@ -16,13 +16,37 @@ import { MonthlyRentalChart } from '../components/dashboard/MonthlyRentalChart';
 import { useRentals } from '../hooks/useRentals';
 import { useItems } from '../hooks/useItems';
 import { useRentalObserver } from '../hooks/useRentalObserver';
+import { useWebSocket } from '../hooks/useWebSocket';
 import { withErrorBoundary } from '../components/decorators/withErrorBoundary';
 import { withLogger } from '../components/decorators/withLogger';
 import { Loader2 } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 
 const DashboardContent: React.FC = () => {
+  const queryClient = useQueryClient();
+
   // 옵저버 패턴: 대여 상태 변경 감지
   const { rentals } = useRentalObserver();
+
+  // 웹소켓 연결: 대여/반납 이벤트 실시간 알림
+  const { isConnected } = useWebSocket(
+    'wss://designpattern.ellen24k.r-e.kr/ws/dashboard',
+    (message) => {
+      console.log('📨 [Dashboard] 웹소켓 메시지 수신:', message);
+
+      // 대여/반납 이벤트 발생 시 데이터 새로고침
+      if (message.type === 'RENTAL_CREATED' || message.type === 'RENTAL_RETURNED') {
+        queryClient.invalidateQueries({ queryKey: ['rentals'] });
+        queryClient.invalidateQueries({ queryKey: ['items'] });
+      }
+    }
+  );
+
+  useEffect(() => {
+    if (isConnected) {
+      console.log('✅ [Dashboard] 웹소켓 연결됨');
+    }
+  }, [isConnected]);
 
   const { data: allRentals = [], isLoading: isLoadingRentals } = useRentals();
   const { data: items = [], isLoading: isLoadingItems } = useItems();

@@ -41,6 +41,7 @@ const ItemsContent: React.FC = () => {
     try {
       if (editingItem) {
         // 수정
+        console.log('📝 [Items] 물품 수정 요청:', { id: editingItem.id, data });
         await updateItemMutation.mutateAsync({
           id: editingItem.id,
           data,
@@ -48,13 +49,18 @@ const ItemsContent: React.FC = () => {
         alert('물품이 성공적으로 수정되었습니다.');
       } else {
         // 등록
+        console.log('📝 [Items] 물품 등록 요청:', data);
         await createItemMutation.mutateAsync(data);
         alert('물품이 성공적으로 등록되었습니다.');
       }
       setIsModalOpen(false);
       setEditingItem(undefined);
-    } catch (error) {
-      alert(editingItem ? '물품 수정에 실패했습니다.' : '물품 등록에 실패했습니다.');
+    } catch (error: any) {
+      console.error('❌ [Items] 물품 처리 실패:', error);
+      const errorMessage = error?.response?.data?.message || error?.message || '알 수 없는 오류가 발생했습니다.';
+      alert(editingItem
+        ? `물품 수정에 실패했습니다.\n상세: ${errorMessage}`
+        : `물품 등록에 실패했습니다.\n상세: ${errorMessage}`);
     }
   };
 

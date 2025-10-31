@@ -16,11 +16,18 @@ interface RentalFormProps {
 }
 
 export const RentalForm: React.FC<RentalFormProps> = ({ items, onSubmit, isSubmitting = false }) => {
+  // 기본 반납 예정일을 3일 뒤로 설정
+  const getDefaultReturnDate = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 3);
+    return date.toISOString().split('T')[0];
+  };
+
   const [formData, setFormData] = useState({
     itemId: '',
     renterName: '',
     renterContact: '',
-    expectedReturnDate: '',
+    expectedReturnDate: getDefaultReturnDate(),
     notes: '',
   });
 
@@ -45,8 +52,10 @@ export const RentalForm: React.FC<RentalFormProps> = ({ items, onSubmit, isSubmi
 
     if (!validate()) return;
 
-    // ISO 8601 형식으로 날짜 변환 (시간 포함)
-    const expectedReturnDateTime = new Date(formData.expectedReturnDate).toISOString();
+    // ISO 8601 형식으로 날짜 변환 (시간을 23:59:59로 설정)
+    const date = new Date(formData.expectedReturnDate);
+    date.setHours(23, 59, 59, 999);
+    const expectedReturnDateTime = date.toISOString();
 
     const requestData: any = {
       itemId: Number(formData.itemId),
@@ -64,12 +73,12 @@ export const RentalForm: React.FC<RentalFormProps> = ({ items, onSubmit, isSubmi
 
     onSubmit(requestData);
 
-    // 폼 초기화
+    // 폼 초기화 (반납 예정일은 다시 3일 뒤로 설정)
     setFormData({
       itemId: '',
       renterName: '',
       renterContact: '',
-      expectedReturnDate: '',
+      expectedReturnDate: getDefaultReturnDate(),
       notes: '',
     });
     setErrors({});
