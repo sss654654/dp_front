@@ -52,8 +52,9 @@ export const RentalForm: React.FC<RentalFormProps> = ({ items, onSubmit, isSubmi
 
     if (!validate()) return;
 
-    // ISO 8601 형식으로 날짜 변환 (시간을 23:59:59로 설정)
+    // ISO 8601 형식으로 날짜 변환 (유예 기간 3일 추가 + 시간을 23:59:59로 설정)
     const date = new Date(formData.expectedReturnDate);
+    date.setDate(date.getDate() + 3); // 유예 기간 3일 추가
     date.setHours(23, 59, 59, 999);
     const expectedReturnDateTime = date.toISOString();
 
